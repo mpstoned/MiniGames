@@ -1,8 +1,9 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
 const STORAGE_KEY = 'minigames.user';
+const ADMIN_USERNAME = 'admin';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -10,6 +11,9 @@ export class AuthService {
 
   /** The signed-in username, or null when signed out. */
   readonly user = signal<string | null>(readStoredUser());
+
+  /** The admin sees the dashboard instead of the games. */
+  readonly isAdmin = computed(() => this.user()?.toLowerCase() === ADMIN_USERNAME);
 
   signUp(username: string): Promise<void> {
     return this.authenticate('signup', username);

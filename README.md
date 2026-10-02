@@ -8,6 +8,10 @@ A small collection of two-player games built with Angular:
 Players sign up or sign in with just a username (no password, names are unique)
 before choosing a game. Global stats for each game are shown on the game picker.
 
+Signing in as **`admin`** opens a dashboard (users, activity per day, results per
+game) instead of the games. Since there are no passwords, anyone who types
+`admin` can open it, so it isn't meant for sensitive data.
+
 **Play online:** https://kind-coast-0a127e80f.6.azurestaticapps.net/
 
 ## How it works
@@ -18,7 +22,7 @@ database and containers automatically on first use (see `api/src/cosmos.ts`):
 
 | Container | Partition key | Documents |
 | --- | --- | --- |
-| `stats` | `/id` | One per game (`tic-tac-toe`, `connect-four`) with play counts and results, plus one per user (`user:<lowercased username>`) |
+| `stats` | `/id` | One per game (`tic-tac-toe`, `connect-four`) with play counts and results, one per user (`user:<lowercased username>`) with sign-ins, last seen and games played, and one per day (`day:YYYY-MM-DD`) with games played that day |
 
 Everything shares one container on purpose: the Cosmos DB free tier covers
 1000 RU/s for the whole account, and `stats` already uses all of it.
@@ -29,6 +33,7 @@ API endpoints:
 - `POST /api/stats` with `{ "game": "tic-tac-toe", "result": "X" }`: records a finished game.
 - `POST /api/users/signup` with `{ "username": "anna" }`: creates a user (409 if taken).
 - `POST /api/users/signin` with `{ "username": "anna" }`: signs in (404 if unknown).
+- `GET /api/dashboard` (header `x-username: admin`): users, results and games per day for the admin dashboard.
 
 The API reads the Cosmos DB connection string from the `COSMOS_CONNECTION_STRING` setting.
 

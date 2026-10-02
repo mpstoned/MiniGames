@@ -1,4 +1,4 @@
-import { Container, CosmosClient, Database, ErrorResponse } from '@azure/cosmos';
+import { Container, CosmosClient, Database, ErrorResponse, PatchRequestBody } from '@azure/cosmos';
 
 /**
  * The database schema. Like a migration script: anything missing is created
@@ -62,4 +62,28 @@ export function getContainer(name: ContainerName): Promise<Container> {
 
 export function hasStatus(err: unknown, code: number): boolean {
   return (err as ErrorResponse)?.code === code;
+}
+
+/**
+ * Applies a patch to a document, creating it from `initial` first if it doesn't
+ * exist yet. Use for counters, where `incr` patches are atomic.
+ */
+export async function patchOrCreate(
+  container: Container,
+  initial: { id: string },
+  operations: PatchRequestBody,
+): Promise<void> {
+  const item = container.item(initial.id, initial.id);
+  try {
+    await item.patch(operations);
+  } catch (err) {
+    if (!hasStatus(err, 404)) throw err;
+    try {
+      await container.items.create(initial);
+    } catch (createErr) {
+      // Another request created it at the same time; that's fine.
+      if (!hasStatus(createErr, 409)) throw createErr;
+    }
+    await item.patch(operations);
+  }
 }

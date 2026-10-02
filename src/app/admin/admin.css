@@ -1,0 +1,360 @@
+main {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: min(100% - 2rem, 1000px);
+  margin: 0 auto;
+  padding-block: 1.5rem 3rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2rem;
+}
+
+h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.hint {
+  margin: 0.25rem 0 0;
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+.message {
+  color: #94a3b8;
+}
+
+.message.error {
+  color: #f87171;
+}
+
+.empty {
+  margin: 1rem 0 0;
+  color: #94a3b8;
+}
+
+.card {
+  padding: 1.25rem;
+  border-radius: 16px;
+  background: #1e293b;
+  min-width: 0;
+}
+
+.card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* ---- Key numbers ---- */
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.tile {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  background: #1e293b;
+}
+
+.tile .label {
+  color: #94a3b8;
+  font-size: 0.875rem;
+}
+
+.tile .value {
+  font-size: 2.25rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: #f8fafc;
+}
+
+.tile .sub {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+/* ---- Games per day chart ---- */
+.toggle {
+  padding: 0.35rem 0.9rem;
+  border: 1px solid #334155;
+  border-radius: 999px;
+  background: transparent;
+  color: #cbd5e1;
+  cursor: pointer;
+}
+
+.toggle:hover {
+  background: #334155;
+}
+
+.chart {
+  display: flex;
+  gap: 0.5rem;
+  height: 220px;
+}
+
+.y-axis {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding-bottom: 1.5rem;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  min-width: 1.5rem;
+}
+
+.plot {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.gridline.top {
+  position: absolute;
+  inset: 0 0 auto;
+  border-top: 1px dashed #334155;
+}
+
+.bars {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  border-bottom: 1px solid #475569;
+}
+
+.col {
+  position: relative;
+  flex: 1;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  outline: none;
+}
+
+.bar {
+  width: 100%;
+  max-width: 18px;
+  border-radius: 4px 4px 0 0;
+  background: #818cf8;
+}
+
+.bar.today {
+  background: #a5b4fc;
+}
+
+.col:hover .bar,
+.col:focus-visible .bar {
+  background: #c7d2fe;
+}
+
+.col:hover,
+.col:focus-visible {
+  background: rgb(148 163 184 / 0.08);
+}
+
+.tooltip {
+  position: absolute;
+  bottom: calc(100% - 2.5rem);
+  left: 50%;
+  z-index: 1;
+  display: none;
+  flex-direction: column;
+  gap: 0.15rem;
+  padding: 0.5rem 0.65rem;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  background: #0f172a;
+  color: #e2e8f0;
+  font-size: 0.8rem;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.4);
+}
+
+.col:first-child .tooltip,
+.col:nth-child(2) .tooltip,
+.col:nth-child(3) .tooltip {
+  left: 0;
+  transform: none;
+}
+
+.col:last-child .tooltip,
+.col:nth-last-child(2) .tooltip,
+.col:nth-last-child(3) .tooltip {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.col:hover .tooltip,
+.col:focus-visible .tooltip {
+  display: flex;
+}
+
+.tooltip-total {
+  margin-top: 0.2rem;
+  padding-top: 0.2rem;
+  border-top: 1px solid #334155;
+  font-weight: 600;
+}
+
+.x-axis {
+  display: flex;
+  gap: 2px;
+  height: 1.5rem;
+  padding-top: 0.35rem;
+  color: #94a3b8;
+  font-size: 0.75rem;
+}
+
+.x-axis span {
+  flex: 1;
+  white-space: nowrap;
+}
+
+/* ---- Results per game ---- */
+.results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.stack {
+  display: flex;
+  gap: 2px;
+  height: 14px;
+  margin-top: 1rem;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.segment {
+  flex-basis: 0;
+  min-width: 4px;
+}
+
+.legend {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin: 1rem 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.9rem;
+}
+
+.legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.swatch {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+
+.legend-label {
+  color: #cbd5e1;
+}
+
+.legend-value {
+  margin-left: auto;
+  color: #f8fafc;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Tables ---- */
+.search {
+  padding: 0.45rem 0.8rem;
+  border: 1px solid #334155;
+  border-radius: 999px;
+  background: #0f172a;
+  color: inherit;
+  font-size: 0.9rem;
+}
+
+.search:focus {
+  outline: 2px solid #6366f1;
+  outline-offset: 1px;
+}
+
+.table-wrap {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+th,
+td {
+  padding: 0.55rem 0.75rem;
+  border-bottom: 1px solid #334155;
+  text-align: left;
+  white-space: nowrap;
+}
+
+th {
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+th.num,
+td.num {
+  text-align: right;
+}
+
+tbody tr:hover {
+  background: rgb(148 163 184 / 0.06);
+}
+
+td.name,
+td.strong {
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.sort {
+  display: inline-flex;
+  gap: 0.3rem;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.sort:hover {
+  color: #e2e8f0;
+}
+
+.arrow {
+  font-size: 0.65rem;
+  min-width: 0.65rem;
+}

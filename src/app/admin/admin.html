@@ -1,0 +1,189 @@
+<main>
+  <h1>Dashboard</h1>
+
+  @if (error()) {
+    <p class="message error" role="alert">Couldn't load the dashboard. Please reload the page.</p>
+  } @else if (!kpis()) {
+    <p class="message">Loading…</p>
+  } @else {
+    @let k = kpis()!;
+
+    <!-- Key numbers -->
+    <section class="kpis" aria-label="Key numbers">
+      <div class="tile">
+        <span class="label">Users</span>
+        <span class="value">{{ k.users }}</span>
+        <span class="sub">{{ k.newUsers }} new in the last 7 days</span>
+      </div>
+      <div class="tile">
+        <span class="label">Active users</span>
+        <span class="value">{{ k.activeUsers }}</span>
+        <span class="sub">seen in the last 7 days</span>
+      </div>
+      <div class="tile">
+        <span class="label">Games played</span>
+        <span class="value">{{ k.totalGames }}</span>
+        <span class="sub">{{ k.gamesPerUser.toFixed(1) }} per user on average</span>
+      </div>
+      <div class="tile">
+        <span class="label">Games today</span>
+        <span class="value">{{ k.gamesToday }}</span>
+        <span class="sub">UTC day</span>
+      </div>
+    </section>
+
+    <!-- Games per day -->
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <h2>Games per day</h2>
+          <p class="hint">Last 30 days · {{ daysTotal() }} games</p>
+        </div>
+        <button class="toggle" (click)="showDayTable.set(!showDayTable())">
+          {{ showDayTable() ? 'Show chart' : 'Show table' }}
+        </button>
+      </div>
+
+      @if (showDayTable()) {
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                @for (g of games; track g.id) {
+                  <th class="num">{{ g.name }}</th>
+                }
+                <th class="num">Total</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (d of days().slice().reverse(); track d.date) {
+                <tr>
+                  <td>{{ shortDate(d.date) }}</td>
+                  @for (g of d.perGame; track g.name) {
+                    <td class="num">{{ g.count }}</td>
+                  }
+                  <td class="num">{{ d.total }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      } @else if (daysTotal() === 0) {
+        <p class="empty">No games played in the last 30 days.</p>
+      } @else {
+        <div class="chart" role="img" [attr.aria-label]="'Bar chart of games per day, ' + daysTotal() + ' games in the last 30 days'">
+          <div class="y-axis">
+            <span>{{ dayMax() }}</span>
+            <span>0</span>
+          </div>
+          <div class="plot">
+            <div class="gridline top"></div>
+            <div class="bars">
+              @for (d of days(); track d.date; let last = $last) {
+                <div class="col" tabindex="0" [attr.aria-label]="shortDate(d.date) + ': ' + d.total + ' games'">
+                  <div class="bar" [class.today]="last" [style.height.%]="(d.total / dayMax()) * 100"></div>
+                  <div class="tooltip" role="tooltip">
+                    <strong>{{ shortDate(d.date) }}{{ last ? ' (today)' : '' }}</strong>
+                    @for (g of d.perGame; track g.name) {
+                      <span>{{ g.name }}: {{ g.count }}</span>
+                    }
+                    <span class="tooltip-total">Total: {{ d.total }}</span>
+                  </div>
+                </div>
+              }
+            </div>
+            <div class="x-axis">
+              @for (d of days(); track d.date; let i = $index) {
+                <span>{{ i % 7 === 2 ? shortDate(d.date) : '' }}</span>
+              }
+            </div>
+          </div>
+        </div>
+      }
+    </section>
+
+    <!-- Results per game -->
+    <section class="results">
+      @for (g of results(); track g.id) {
+        <div class="card">
+          <h2>{{ g.name }}</h2>
+          <p class="hint">{{ g.played }} games played</p>
+          @if (g.played === 0) {
+            <p class="empty">No games yet.</p>
+          } @else {
+            <div class="stack" role="img" [attr.aria-label]="g.name + ' results'">
+              @for (s of g.segments; track s.key) {
+                @if (s.count > 0) {
+                  <div class="segment" [style.flex-grow]="s.count" [style.background]="s.color" [title]="s.label + ': ' + s.count"></div>
+                }
+              }
+            </div>
+            <ul class="legend">
+              @for (s of g.segments; track s.key) {
+                <li>
+                  <span class="swatch" [style.background]="s.color"></span>
+                  <span class="legend-label">{{ s.label }}</span>
+                  <span class="legend-value">{{ s.count }} · {{ s.percent.toFixed(0) }}%</span>
+                </li>
+              }
+            </ul>
+          }
+        </div>
+      }
+    </section>
+
+    <!-- Users -->
+    <section class="card">
+      <div class="card-head">
+        <div>
+          <h2>Users</h2>
+          <p class="hint">Games are counted for the signed-in player (both sides are played on one device).</p>
+        </div>
+        <input
+          class="search"
+          type="search"
+          placeholder="Search users"
+          aria-label="Search users"
+          [value]="search()"
+          (input)="search.set($any($event.target).value)"
+        />
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              @for (c of columns; track c.key) {
+                <th [class.num]="c.numeric" [attr.aria-sort]="ariaSort(c.key)">
+                  <button class="sort" (click)="sortBy(c.key)">
+                    {{ c.label }}
+                    <span class="arrow" aria-hidden="true">
+                      {{ sort().key === c.key ? (sort().desc ? '▼' : '▲') : '' }}
+                    </span>
+                  </button>
+                </th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (u of users(); track u.username) {
+              <tr>
+                <td class="name">{{ u.username }}</td>
+                <td>{{ formatDate(u.createdAt) }}</td>
+                <td [title]="formatDate(u.lastSeenAt)">{{ relative(u.lastSeenAt) }}</td>
+                <td class="num">{{ u.signIns }}</td>
+                <td class="num">{{ u.games['tic-tac-toe'] }}</td>
+                <td class="num">{{ u.games['connect-four'] }}</td>
+                <td class="num strong">{{ u.total }}</td>
+              </tr>
+            } @empty {
+              <tr>
+                <td class="empty" [attr.colspan]="columns.length">No users found.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</main>
