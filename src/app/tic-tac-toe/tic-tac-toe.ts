@@ -1,4 +1,5 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { StatsService } from '../stats.service';
 
 type Player = 'X' | 'O';
 type Cell = Player | null;
@@ -15,6 +16,8 @@ const LINES = [
   templateUrl: './tic-tac-toe.html',
 })
 export class TicTacToe {
+  private readonly stats = inject(StatsService);
+
   protected readonly board = signal<Cell[]>(Array(9).fill(null));
   protected readonly current = signal<Player>('X');
   protected readonly score = signal({ X: 0, O: 0, draw: 0 });
@@ -35,8 +38,10 @@ export class TicTacToe {
     const winner = this.winner();
     if (winner) {
       this.score.update((s) => ({ ...s, [winner]: s[winner] + 1 }));
+      this.stats.record('tic-tac-toe', winner);
     } else if (this.isDraw()) {
       this.score.update((s) => ({ ...s, draw: s.draw + 1 }));
+      this.stats.record('tic-tac-toe', 'draw');
     } else {
       this.current.update((p) => (p === 'X' ? 'O' : 'X'));
     }

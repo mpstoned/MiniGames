@@ -1,5 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { AllStats, GameId, StatsService } from '../stats.service';
 
 @Component({
   selector: 'app-home',
@@ -13,6 +15,12 @@ import { RouterLink } from '@angular/router';
             <span class="icon">{{ game.icon }}</span>
             <span class="name">{{ game.name }}</span>
             <span class="desc">{{ game.description }}</span>
+            @if (stats()[game.id]; as s) {
+              <span class="stats">
+                Played {{ s.played }} {{ s.played === 1 ? 'time' : 'times' }}<br />
+                {{ breakdown(game.labels, s.results) }}
+              </span>
+            }
           </a>
         }
       </div>
@@ -63,11 +71,43 @@ import { RouterLink } from '@angular/router';
       color: #94a3b8;
       text-align: center;
     }
+    .stats {
+      margin-top: 0.5rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #334155;
+      width: 100%;
+      font-size: 0.85rem;
+      color: #cbd5e1;
+      text-align: center;
+      line-height: 1.5;
+    }
   `,
 })
 export class Home {
-  protected readonly games = [
-    { path: '/tic-tac-toe', icon: '❌⭕', name: 'Tic Tac Toe', description: 'Get three in a row on a 3×3 grid.' },
-    { path: '/connect-four', icon: '🔴🟡', name: 'Connect Four', description: 'Drop discs and connect four in a row.' },
+  protected readonly stats = toSignal(inject(StatsService).getStats(), { initialValue: {} as AllStats });
+
+  protected readonly games: { id: GameId; path: string; icon: string; name: string; description: string; labels: Record<string, string> }[] = [
+    {
+      id: 'tic-tac-toe',
+      path: '/tic-tac-toe',
+      icon: '❌⭕',
+      name: 'Tic Tac Toe',
+      description: 'Get three in a row on a 3×3 grid.',
+      labels: { X: 'X wins', O: 'O wins', draw: 'Draws' },
+    },
+    {
+      id: 'connect-four',
+      path: '/connect-four',
+      icon: '🔴🟡',
+      name: 'Connect Four',
+      description: 'Drop discs and connect four in a row.',
+      labels: { red: 'Red wins', yellow: 'Yellow wins', draw: 'Draws' },
+    },
   ];
+
+  protected breakdown(labels: Record<string, string>, results: Record<string, number>): string {
+    return Object.entries(labels)
+      .map(([key, label]) => `${label}: ${results[key] ?? 0}`)
+      .join(' · ');
+  }
 }

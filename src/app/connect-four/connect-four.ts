@@ -1,4 +1,5 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { StatsService } from '../stats.service';
 
 type Player = 'red' | 'yellow';
 type Cell = Player | null;
@@ -18,6 +19,8 @@ const DIRECTIONS = [
   templateUrl: './connect-four.html',
 })
 export class ConnectFour {
+  private readonly stats = inject(StatsService);
+
   protected readonly columns = Array.from({ length: COLS }, (_, c) => c);
   protected readonly rows = Array.from({ length: ROWS }, (_, r) => r);
 
@@ -59,8 +62,10 @@ export class ConnectFour {
     if (line) {
       this.winLine.set(line);
       this.score.update((s) => ({ ...s, [player]: s[player] + 1 }));
+      this.stats.record('connect-four', player);
     } else if (this.isDraw()) {
       this.score.update((s) => ({ ...s, draw: s.draw + 1 }));
+      this.stats.record('connect-four', 'draw');
     } else {
       this.current.set(player === 'red' ? 'yellow' : 'red');
     }
