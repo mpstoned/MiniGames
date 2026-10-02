@@ -27,7 +27,8 @@ async function signUp(request: HttpRequest): Promise<HttpResponseInit> {
   // The lowercased name is the document id, so Cosmos itself rejects duplicates.
   const user: User = { id: username.toLowerCase(), username, createdAt: new Date().toISOString() };
   try {
-    await getContainer('users').items.create(user);
+    const users = await getContainer('users');
+    await users.items.create(user);
   } catch (err) {
     if (hasStatus(err, 409)) return { status: 409, jsonBody: { error: 'Username already taken' } };
     throw err;
@@ -40,7 +41,8 @@ async function signIn(request: HttpRequest): Promise<HttpResponseInit> {
   if (!username) return invalidUsername;
 
   const id = username.toLowerCase();
-  const { resource } = await getContainer('users').item(id, id).read<User>();
+  const users = await getContainer('users');
+  const { resource } = await users.item(id, id).read<User>();
   if (!resource) return { status: 404, jsonBody: { error: 'User not found' } };
   return { jsonBody: { username: resource.username } };
 }

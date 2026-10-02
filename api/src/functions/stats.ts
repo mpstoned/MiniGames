@@ -21,7 +21,8 @@ function emptyStats(game: string): GameStats {
 }
 
 async function getStats(): Promise<HttpResponseInit> {
-  const { resources } = await getContainer('stats').items.readAll<GameStats>().fetchAll();
+  const container = await getContainer('stats');
+  const { resources } = await container.items.readAll<GameStats>().fetchAll();
   const stats = Object.fromEntries(
     Object.keys(RESULTS).map((game) => {
       const doc = resources.find((r) => r.id === game) ?? emptyStats(game);
@@ -39,7 +40,8 @@ async function recordResult(request: HttpRequest): Promise<HttpResponseInit> {
     return { status: 400, jsonBody: { error: 'Invalid game or result' } };
   }
 
-  const item = getContainer('stats').item(game, game);
+  const container = await getContainer('stats');
+  const item = container.item(game, game);
   const increment = () =>
     item.patch([
       { op: 'incr', path: '/played', value: 1 },
@@ -52,7 +54,7 @@ async function recordResult(request: HttpRequest): Promise<HttpResponseInit> {
     if (!hasStatus(err, 404)) throw err;
     // First game ever for this game type: create the document, then increment.
     try {
-      await getContainer('stats').items.create(emptyStats(game));
+      await container.items.create(emptyStats(game));
     } catch (createErr) {
       // Another request created it at the same time; that's fine.
       if (!hasStatus(createErr, 409)) throw createErr;

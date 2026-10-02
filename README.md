@@ -13,7 +13,8 @@ before choosing a game. Global stats for each game are shown on the game picker.
 ## How it works
 
 The app runs on **Azure Static Web Apps**. A small API in `api/` (Azure Functions)
-stores data in **Azure Cosmos DB** (database `minigames`):
+stores data in **Azure Cosmos DB** (database `minigames`). The API creates the
+database and containers automatically on first use (see `api/src/cosmos.ts`):
 
 | Container | Partition key | Contents |
 | --- | --- | --- |
