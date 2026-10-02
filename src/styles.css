@@ -6,3 +6,42 @@ body {
   color: #e2e8f0;
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 }
+
+.game {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1rem 1rem 2rem;
+}
+
+.game h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+.status {
+  margin: 0;
+  font-size: 1.25rem;
+  min-height: 1.5em;
+}
+
+.reset {
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 999px;
+  background: #6366f1;
+  color: #fff;
+  cursor: pointer;
+}
+
+.reset:hover {
+  background: #4f46e5;
+}
+
+.score {
+  display: flex;
+  gap: 1.5rem;
+  color: #94a3b8;
+}

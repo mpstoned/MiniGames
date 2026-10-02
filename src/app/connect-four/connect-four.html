@@ -1,0 +1,37 @@
+<main class="game">
+  <h1>Connect Four</h1>
+
+  <p class="status">
+    @if (winner(); as w) {
+      <span class="disc-icon" [class]="w"></span> {{ w === 'red' ? 'Red' : 'Yellow' }} wins!
+    } @else if (isDraw()) {
+      It's a draw!
+    } @else {
+      <span class="disc-icon" [class]="current()"></span>
+      {{ current() === 'red' ? 'Red' : 'Yellow' }}'s turn
+    }
+  </p>
+
+  <div class="board" [class.over]="gameOver()">
+    @for (col of columns; track col) {
+      <button
+        class="column"
+        [disabled]="gameOver() || isColumnFull(col)"
+        (click)="drop(col)"
+        [attr.aria-label]="'Drop disc in column ' + (col + 1)"
+      >
+        @for (row of rows; track row) {
+          <span class="slot" [class]="cell(row, col)" [class.win]="isWinCell(row, col)"></span>
+        }
+      </button>
+    }
+  </div>
+
+  <button class="reset" (click)="reset()">New game</button>
+
+  <div class="score">
+    <span>Red: {{ score().red }}</span>
+    <span>Yellow: {{ score().yellow }}</span>
+    <span>Draws: {{ score().draw }}</span>
+  </div>
+</main>

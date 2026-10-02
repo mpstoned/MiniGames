@@ -1,6 +1,9 @@
-# MiniGames – Tic Tac Toe
+# MiniGames
 
-A simple two-player Tic Tac Toe game built with Angular.
+A small collection of two-player games built with Angular:
+
+- **Tic Tac Toe**: get three in a row on a 3×3 grid.
+- **Connect Four**: drop discs and connect four in a row.
 
 **Play online:** https://mpstoned.github.io/MiniGames/
 
