@@ -1,5 +1,5 @@
 import { app, HttpRequest, HttpResponseInit } from '@azure/functions';
-import { Container, CosmosClient, ErrorResponse } from '@azure/cosmos';
+import { getContainer, hasStatus } from '../cosmos';
 
 const RESULTS: Record<string, string[]> = {
   'tic-tac-toe': ['X', 'O', 'draw'],
@@ -12,17 +12,6 @@ interface GameStats {
   results: Record<string, number>;
 }
 
-let container: Container | undefined;
-
-function getContainer(): Container {
-  if (!container) {
-    const connectionString = process.env['COSMOS_CONNECTION_STRING'];
-    if (!connectionString) throw new Error('COSMOS_CONNECTION_STRING is not set');
-    container = new CosmosClient(connectionString).database('minigames').container('stats');
-  }
-  return container;
-}
-
 function emptyStats(game: string): GameStats {
   return {
     id: game,
@@ -32,7 +21,7 @@ function emptyStats(game: string): GameStats {
 }
 
 async function getStats(): Promise<HttpResponseInit> {
-  const { resources } = await getContainer().items.readAll<GameStats>().fetchAll();
+  const { resources } = await getContainer('stats').items.readAll<GameStats>().fetchAll();
   const stats = Object.fromEntries(
     Object.keys(RESULTS).map((game) => {
       const doc = resources.find((r) => r.id === game) ?? emptyStats(game);
@@ -50,7 +39,7 @@ async function recordResult(request: HttpRequest): Promise<HttpResponseInit> {
     return { status: 400, jsonBody: { error: 'Invalid game or result' } };
   }
 
-  const item = getContainer().item(game, game);
+  const item = getContainer('stats').item(game, game);
   const increment = () =>
     item.patch([
       { op: 'incr', path: '/played', value: 1 },
@@ -60,13 +49,13 @@ async function recordResult(request: HttpRequest): Promise<HttpResponseInit> {
   try {
     await increment();
   } catch (err) {
-    if ((err as ErrorResponse).code !== 404) throw err;
+    if (!hasStatus(err, 404)) throw err;
     // First game ever for this game type: create the document, then increment.
     try {
-      await getContainer().items.create(emptyStats(game));
+      await getContainer('stats').items.create(emptyStats(game));
     } catch (createErr) {
       // Another request created it at the same time; that's fine.
-      if ((createErr as ErrorResponse).code !== 409) throw createErr;
+      if (!hasStatus(createErr, 409)) throw createErr;
     }
     await increment();
   }

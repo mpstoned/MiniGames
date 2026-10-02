@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
+import { AuthService } from '../auth.service';
 import { AllStats, GameId, StatsService } from '../stats.service';
 
 @Component({
@@ -8,7 +9,8 @@ import { AllStats, GameId, StatsService } from '../stats.service';
   imports: [RouterLink],
   template: `
     <main>
-      <h1>Choose a game</h1>
+      <h1>Welcome, {{ user() }}!</h1>
+      <p class="subtitle">Choose a game</p>
       <div class="games">
         @for (game of games; track game.path) {
           <a class="card" [routerLink]="game.path">
@@ -37,6 +39,12 @@ import { AllStats, GameId, StatsService } from '../stats.service';
     h1 {
       margin: 0;
       font-size: 2.5rem;
+      text-align: center;
+    }
+    .subtitle {
+      margin: -1.25rem 0 0;
+      font-size: 1.2rem;
+      color: #94a3b8;
     }
     .games {
       display: grid;
@@ -84,6 +92,7 @@ import { AllStats, GameId, StatsService } from '../stats.service';
   `,
 })
 export class Home {
+  protected readonly user = inject(AuthService).user;
   protected readonly stats = toSignal(inject(StatsService).getStats(), { initialValue: {} as AllStats });
 
   protected readonly games: { id: GameId; path: string; icon: string; name: string; description: string; labels: Record<string, string> }[] = [
