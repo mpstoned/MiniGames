@@ -5,8 +5,17 @@ const USERNAME_PATTERN = /^[A-Za-z0-9_-]{3,20}$/;
 
 interface User {
   id: string;
+  type: 'user';
   username: string;
   createdAt: string;
+}
+
+/**
+ * Users share the `stats` container (see cosmos.ts) under a `user:` id prefix.
+ * The lowercased name is part of the id, so Cosmos itself rejects duplicates.
+ */
+function userId(username: string): string {
+  return `user:${username.toLowerCase()}`;
 }
 
 async function readUsername(request: HttpRequest): Promise<string | null> {
@@ -24,10 +33,9 @@ async function signUp(request: HttpRequest): Promise<HttpResponseInit> {
   const username = await readUsername(request);
   if (!username) return invalidUsername;
 
-  // The lowercased name is the document id, so Cosmos itself rejects duplicates.
-  const user: User = { id: username.toLowerCase(), username, createdAt: new Date().toISOString() };
+  const user: User = { id: userId(username), type: 'user', username, createdAt: new Date().toISOString() };
   try {
-    const users = await getContainer('users');
+    const users = await getContainer('stats');
     await users.items.create(user);
   } catch (err) {
     if (hasStatus(err, 409)) return { status: 409, jsonBody: { error: 'Username already taken' } };
@@ -40,8 +48,8 @@ async function signIn(request: HttpRequest): Promise<HttpResponseInit> {
   const username = await readUsername(request);
   if (!username) return invalidUsername;
 
-  const id = username.toLowerCase();
-  const users = await getContainer('users');
+  const id = userId(username);
+  const users = await getContainer('stats');
   const { resource } = await users.item(id, id).read<User>();
   if (!resource) return { status: 404, jsonBody: { error: 'User not found' } };
   return { jsonBody: { username: resource.username } };

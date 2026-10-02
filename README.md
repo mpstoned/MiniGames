@@ -16,10 +16,12 @@ The app runs on **Azure Static Web Apps**. A small API in `api/` (Azure Function
 stores data in **Azure Cosmos DB** (database `minigames`). The API creates the
 database and containers automatically on first use (see `api/src/cosmos.ts`):
 
-| Container | Partition key | Contents |
+| Container | Partition key | Documents |
 | --- | --- | --- |
-| `stats` | `/id` | One document per game with play counts and results |
-| `users` | `/id` | One document per user; the id is the lowercased username |
+| `stats` | `/id` | One per game (`tic-tac-toe`, `connect-four`) with play counts and results, plus one per user (`user:<lowercased username>`) |
+
+Everything shares one container on purpose: the Cosmos DB free tier covers
+1000 RU/s for the whole account, and `stats` already uses all of it.
 
 API endpoints:
 

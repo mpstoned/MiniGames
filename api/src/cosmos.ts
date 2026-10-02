@@ -4,11 +4,15 @@ import { Container, CosmosClient, Database, ErrorResponse } from '@azure/cosmos'
  * The database schema. Like a migration script: anything missing is created
  * automatically on first use, so no manual setup is needed in Azure.
  * Only add entries here; existing containers are never changed or deleted.
+ *
+ * Keep the number of containers small: each one reserves its own throughput,
+ * and the Cosmos DB free tier only covers 1000 RU/s for the whole account
+ * (`stats` already uses all of it). New kinds of data share the `stats`
+ * container instead, distinguished by an id prefix (e.g. `user:anna`).
  */
 const DATABASE_ID = 'minigames';
 const CONTAINERS = {
   stats: { partitionKey: '/id' },
-  users: { partitionKey: '/id' },
 };
 
 export type ContainerName = keyof typeof CONTAINERS;

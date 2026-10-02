@@ -22,14 +22,15 @@ function emptyStats(game: string): GameStats {
 
 async function getStats(): Promise<HttpResponseInit> {
   const container = await getContainer('stats');
-  const { resources } = await container.items.readAll<GameStats>().fetchAll();
-  const stats = Object.fromEntries(
-    Object.keys(RESULTS).map((game) => {
-      const doc = resources.find((r) => r.id === game) ?? emptyStats(game);
-      return [game, { played: doc.played, results: doc.results }];
+  // Read only the game documents by id; the container also holds user documents.
+  const stats = await Promise.all(
+    Object.keys(RESULTS).map(async (game) => {
+      const { resource } = await container.item(game, game).read<GameStats>();
+      const doc = resource ?? emptyStats(game);
+      return [game, { played: doc.played, results: doc.results }] as const;
     }),
   );
-  return { jsonBody: stats };
+  return { jsonBody: Object.fromEntries(stats) };
 }
 
 async function recordResult(request: HttpRequest): Promise<HttpResponseInit> {
