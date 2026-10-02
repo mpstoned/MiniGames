@@ -1,0 +1,36 @@
+<main>
+  <h1>Tic Tac Toe</h1>
+
+  <p class="status">
+    @if (winner(); as w) {
+      Player <strong [class]="w">{{ w }}</strong> wins!
+    } @else if (isDraw()) {
+      It's a draw!
+    } @else {
+      Player <strong [class]="current()">{{ current() }}</strong>'s turn
+    }
+  </p>
+
+  <div class="board">
+    @for (cell of board(); track $index) {
+      <button
+        class="cell"
+        [class]="cell"
+        [class.win]="winLine()?.includes($index)"
+        [disabled]="!!cell || !!winner()"
+        (click)="play($index)"
+        [attr.aria-label]="'Cell ' + ($index + 1) + (cell ? ': ' + cell : '')"
+      >
+        {{ cell }}
+      </button>
+    }
+  </div>
+
+  <button class="reset" (click)="reset()">New game</button>
+
+  <div class="score">
+    <span>X: {{ score().X }}</span>
+    <span>O: {{ score().O }}</span>
+    <span>Draws: {{ score().draw }}</span>
+  </div>
+</main>

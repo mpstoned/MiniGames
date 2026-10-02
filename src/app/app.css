@@ -1,0 +1,83 @@
+main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 2rem 1rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 2.5rem;
+}
+
+.status {
+  margin: 0;
+  font-size: 1.25rem;
+  min-height: 1.5em;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  width: min(90vw, 330px);
+  aspect-ratio: 1;
+}
+
+.cell {
+  font-size: clamp(2rem, 12vw, 4rem);
+  font-weight: 700;
+  border: none;
+  border-radius: 12px;
+  background: #1e293b;
+  color: inherit;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.cell:not(:disabled):hover {
+  background: #334155;
+  transform: scale(1.03);
+}
+
+.cell:disabled {
+  cursor: default;
+}
+
+.cell.win {
+  background: #15803d;
+}
+
+.X {
+  color: #38bdf8;
+}
+
+.O {
+  color: #f472b6;
+}
+
+.cell.win.X,
+.cell.win.O {
+  color: #fff;
+}
+
+.reset {
+  padding: 0.6rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 999px;
+  background: #6366f1;
+  color: #fff;
+  cursor: pointer;
+}
+
+.reset:hover {
+  background: #4f46e5;
+}
+
+.score {
+  display: flex;
+  gap: 1.5rem;
+  color: #94a3b8;
+}
