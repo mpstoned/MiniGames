@@ -1,0 +1,85 @@
+<main class="game">
+  <h1>{{ gameName() }}</h1>
+
+  @if (fatal()) {
+    <p class="status error" role="alert">{{ fatal() }}</p>
+    <a class="reset" routerLink="/">Back to games</a>
+  } @else if (!match()) {
+    <p class="status">Joining match {{ code }}…</p>
+  } @else {
+    @let m = match()!;
+    @let seat = mySeat();
+
+    @if (m.status === 'waiting') {
+      <section class="invite">
+        <p class="status">Waiting for your friend to join…</p>
+        <p class="hint">Send them this code or link:</p>
+        <div class="code" aria-label="Match code">{{ m.code }}</div>
+        <div class="link-row">
+          <input class="link" [value]="link" readonly aria-label="Match link" (focus)="$any($event.target).select()" />
+          <button class="copy" (click)="copyLink()">{{ copied() ? 'Copied!' : 'Copy link' }}</button>
+        </div>
+      </section>
+    } @else {
+      <p class="players">
+        @for (s of seats; track s) {
+          @if (!$first) {
+            <span class="vs">vs</span>
+          }
+          <span class="player" [class.active]="m.status === 'playing' && m.turn === s">
+            @if (m.game === 'tic-tac-toe') {
+              <strong class="mark" [class]="mark(s)">{{ mark(s) }}</strong>
+            } @else {
+              <span class="disc-icon" [class]="mark(s)"></span>
+            }
+            {{ m.players[s] }}{{ s === seat ? ' (you)' : '' }}
+          </span>
+        }
+      </p>
+
+      <p class="status" aria-live="polite">
+        @if (m.status === 'finished') {
+          @if (!m.winner) {
+            It's a draw!
+          } @else if (m.winner === seat) {
+            You win! 🎉
+          } @else {
+            {{ m.players[m.winner] }} wins!
+          }
+        } @else if (myTurn()) {
+          Your turn
+        } @else {
+          Waiting for {{ opponent() }}…
+        }
+      </p>
+    }
+
+    @if (m.game === 'tic-tac-toe') {
+      <app-tic-tac-toe-board
+        [cells]="tttCells()"
+        [winLine]="m.winLine"
+        [disabled]="!myTurn() || busy()"
+        (play)="play($event)"
+      />
+    } @else {
+      <app-connect-four-board
+        [cells]="c4Cells()"
+        [winLine]="m.winLine"
+        [over]="m.status === 'finished'"
+        [disabled]="!myTurn() || busy()"
+        (drop)="play($event)"
+      />
+    }
+
+    @if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
+    }
+
+    @if (m.status === 'finished') {
+      <button class="reset" [disabled]="busy()" (click)="rematch()">Rematch</button>
+      <p class="hint">In the rematch, the other player starts.</p>
+    }
+
+    <a class="back" routerLink="/">Back to games</a>
+  }
+</main>

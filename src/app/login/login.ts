@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { AuthService } from '../auth.service';
 
 @Component({
@@ -121,6 +121,11 @@ import { AuthService } from '../auth.service';
 export class Login {
   private readonly auth = inject(AuthService);
   private readonly router = inject(Router);
+  /** Where to go after signing in; only same-site paths, never another website. */
+  private readonly returnUrl = (() => {
+    const url = inject(ActivatedRoute).snapshot.queryParamMap.get('returnUrl') ?? '/';
+    return url.startsWith('/') && !url.startsWith('//') ? url : '/';
+  })();
 
   protected username = '';
   protected readonly busy = signal(false);
@@ -131,7 +136,7 @@ export class Login {
     this.error.set(null);
     try {
       await (action === 'signin' ? this.auth.signIn(this.username) : this.auth.signUp(this.username));
-      await this.router.navigateByUrl('/');
+      await this.router.navigateByUrl(this.returnUrl);
     } catch (err) {
       this.error.set((err as Error).message);
     } finally {

@@ -35,13 +35,11 @@
   box-shadow: inset 0 3px 6px rgb(0 0 0 / 0.5);
 }
 
-.slot.red,
-.disc-icon.red {
+.slot.red {
   background: #ef4444;
 }
 
-.slot.yellow,
-.disc-icon.yellow {
+.slot.yellow {
   background: #facc15;
 }
 
@@ -60,13 +58,6 @@
   opacity: 0.55;
 }
 
-.disc-icon {
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  border-radius: 50%;
-  vertical-align: -0.15em;
-}
 
 @keyframes drop {
   from {

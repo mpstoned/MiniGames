@@ -1,7 +1,7 @@
 import { app, HttpRequest, HttpResponseInit } from '@azure/functions';
-import { PatchRequestBody } from '@azure/cosmos';
-import { getContainer, hasStatus, patchOrCreate } from '../cosmos';
-import { emptyDay, emptyStats, GAMES, GameStats, RESULTS, userId } from '../games';
+import { getContainer } from '../cosmos';
+import { emptyStats, GAMES, GameStats, RESULTS } from '../games';
+import { recordGame } from '../record';
 
 async function getStats(): Promise<HttpResponseInit> {
   const container = await getContainer('stats');
@@ -23,44 +23,9 @@ async function recordResult(request: HttpRequest): Promise<HttpResponseInit> {
   if (!RESULTS[game]?.includes(result)) {
     return { status: 400, jsonBody: { error: 'Invalid game or result' } };
   }
-
-  const container = await getContainer('stats');
-  const now = new Date().toISOString();
-  const date = now.slice(0, 10);
-
-  await Promise.all([
-    patchOrCreate(container, emptyStats(game), [
-      { op: 'incr', path: '/played', value: 1 },
-      { op: 'incr', path: `/results/${result}`, value: 1 },
-    ]),
-    patchOrCreate(container, emptyDay(date), [{ op: 'incr', path: `/games/${game}`, value: 1 }]),
-    recordForPlayer(body?.player, game, now),
-  ]);
+  const player = typeof body?.player === 'string' ? body.player : '';
+  await recordGame(game, result, player ? [player] : []);
   return { status: 204 };
-}
-
-async function recordForPlayer(player: unknown, game: string, now: string): Promise<void> {
-  if (typeof player !== 'string' || !player) return;
-  const id = userId(player);
-  const item = (await getContainer('stats')).item(id, id);
-  const operations: PatchRequestBody = [
-    { op: 'incr', path: `/games/${game}`, value: 1 },
-    { op: 'set', path: '/lastSeenAt', value: now },
-  ];
-  try {
-    await item.patch(operations);
-  } catch (err) {
-    // Unknown user (e.g. deleted while still signed in): the game still counts globally.
-    if (hasStatus(err, 404)) return;
-    if (!hasStatus(err, 400)) throw err;
-    // Users created before per-user stats existed have no /games object yet.
-    await item
-      .patch({ condition: 'FROM c WHERE NOT IS_DEFINED(c.games)', operations: [{ op: 'add', path: '/games', value: {} }] })
-      .catch((e) => {
-        if (!hasStatus(e, 412)) throw e;
-      });
-    await item.patch(operations);
-  }
 }
 
 app.http('stats', {

@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { StatsService } from '../stats.service';
+import { ConnectFourBoard } from './connect-four-board';
 
 type Player = 'red' | 'yellow';
 type Cell = Player | null;
@@ -15,14 +16,11 @@ const DIRECTIONS = [
 
 @Component({
   selector: 'app-connect-four',
-  styleUrl: './connect-four.css',
+  imports: [ConnectFourBoard],
   templateUrl: './connect-four.html',
 })
 export class ConnectFour {
   private readonly stats = inject(StatsService);
-
-  protected readonly columns = Array.from({ length: COLS }, (_, c) => c);
-  protected readonly rows = Array.from({ length: ROWS }, (_, r) => r);
 
   protected readonly board = signal<Cell[]>(Array(ROWS * COLS).fill(null));
   protected readonly current = signal<Player>('red');
@@ -35,18 +33,6 @@ export class ConnectFour {
   });
   protected readonly isDraw = computed(() => !this.winner() && this.board().every((c) => c));
   protected readonly gameOver = computed(() => !!this.winner() || this.isDraw());
-
-  protected cell(row: number, col: number): Cell {
-    return this.board()[row * COLS + col];
-  }
-
-  protected isWinCell(row: number, col: number): boolean {
-    return this.winLine()?.includes(row * COLS + col) ?? false;
-  }
-
-  protected isColumnFull(col: number): boolean {
-    return this.board()[col] !== null;
-  }
 
   protected drop(col: number): void {
     if (this.gameOver()) return;

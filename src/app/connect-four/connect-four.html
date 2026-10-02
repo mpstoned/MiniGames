@@ -12,20 +12,13 @@
     }
   </p>
 
-  <div class="board" [class.over]="gameOver()">
-    @for (col of columns; track col) {
-      <button
-        class="column"
-        [disabled]="gameOver() || isColumnFull(col)"
-        (click)="drop(col)"
-        [attr.aria-label]="'Drop disc in column ' + (col + 1)"
-      >
-        @for (row of rows; track row) {
-          <span class="slot" [class]="cell(row, col)" [class.win]="isWinCell(row, col)"></span>
-        }
-      </button>
-    }
-  </div>
+  <app-connect-four-board
+    [cells]="board()"
+    [winLine]="winLine()"
+    [over]="gameOver()"
+    [disabled]="gameOver()"
+    (drop)="drop($event)"
+  />
 
   <button class="reset" (click)="reset()">New game</button>
 

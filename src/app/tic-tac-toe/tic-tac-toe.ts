@@ -1,5 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { StatsService } from '../stats.service';
+import { TicTacToeBoard } from './tic-tac-toe-board';
 
 type Player = 'X' | 'O';
 type Cell = Player | null;
@@ -12,7 +13,7 @@ const LINES = [
 
 @Component({
   selector: 'app-tic-tac-toe',
-  styleUrl: './tic-tac-toe.css',
+  imports: [TicTacToeBoard],
   templateUrl: './tic-tac-toe.html',
 })
 export class TicTacToe {

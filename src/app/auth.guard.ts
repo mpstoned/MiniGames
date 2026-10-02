@@ -2,9 +2,13 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from './auth.service';
 
-/** Only lets signed-in users through; everyone else goes to the login page. */
-export const signedInGuard: CanActivateFn = () =>
-  !!inject(AuthService).user() || inject(Router).createUrlTree(['/login']);
+/**
+ * Only lets signed-in users through; everyone else goes to the login page,
+ * which brings them back afterwards (e.g. to a match link from a friend).
+ */
+export const signedInGuard: CanActivateFn = (_route, state) =>
+  !!inject(AuthService).user() ||
+  inject(Router).createUrlTree(['/login'], { queryParams: state.url === '/' ? {} : { returnUrl: state.url } });
 
 /** Keeps signed-in users away from the login page. */
 export const signedOutGuard: CanActivateFn = () =>

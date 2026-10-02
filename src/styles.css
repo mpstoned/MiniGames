@@ -45,3 +45,28 @@ body {
   gap: 1.5rem;
   color: #94a3b8;
 }
+
+/* Player markers in status lines (local and online games) */
+.mark.X {
+  color: #38bdf8;
+}
+
+.mark.O {
+  color: #f472b6;
+}
+
+.disc-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  border-radius: 50%;
+  vertical-align: -0.15em;
+}
+
+.disc-icon.red {
+  background: #ef4444;
+}
+
+.disc-icon.yellow {
+  background: #facc15;
+}
